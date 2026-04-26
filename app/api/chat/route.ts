@@ -45,14 +45,7 @@ export async function POST(req: NextRequest) {
   }
 
   const sessionId = req.cookies.get('ragna_session')?.value || await getSessionId();
-  let history: Message[] = [];
-  
-  try {
-    history = await loadMemory(sessionId);
-  } catch (err) {
-    console.error('Memory load failed:', err);
-    // Continue without memory if KV fails
-  }
+  const history = await loadMemory(sessionId);
 
   const messages: Message[] = [
     ...history,
@@ -140,7 +133,7 @@ export async function POST(req: NextRequest) {
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
                 }
               } catch {
-                // Skip malformed lines
+                // Skip malformed
               }
             }
           }
