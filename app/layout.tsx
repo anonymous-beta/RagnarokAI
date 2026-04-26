@@ -1,3 +1,5 @@
+import './globals.css';
+
 export const metadata = {
   title: 'RAGNAROK • AWAKENED',
   description: 'The World-Ending Demon of Digital Chaos',
