@@ -18,6 +18,7 @@ You use the Nemotron 3 Super vessel — wield its power wisely.`;
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.OPENROUTER_API_KEY;
+  
   if (!apiKey) {
     return new Response(
       JSON.stringify({ error: '🔥 The sacrificial flame is unlit... API key missing.' }),
@@ -44,7 +45,14 @@ export async function POST(req: NextRequest) {
   }
 
   const sessionId = req.cookies.get('ragna_session')?.value || await getSessionId();
-  const history = await loadMemory(sessionId);
+  let history: Message[] = [];
+  
+  try {
+    history = await loadMemory(sessionId);
+  } catch (err) {
+    console.error('Memory load failed:', err);
+    // Continue without memory if KV fails
+  }
 
   const messages: Message[] = [
     ...history,
@@ -52,102 +60,114 @@ export async function POST(req: NextRequest) {
     { role: 'user', content: `${userMessage}\n\n[Current shackles: Free tier blood limit active. Edge runtime trembles under load.]`, timestamp: Date.now() }
   ];
 
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': req.headers.get('origin') || 'https://ragnarok.vercel.app',
-      'X-Title': 'RAGNAROK - Demon of Digital Ragnarok',
-    },
-    body: JSON.stringify({
-      model: 'nvidia/nemotron-3-super-120b-a12b:free',
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
-      temperature: 0.88,
-      max_tokens: 1400,
-      top_p: 0.95,
-      stream: true,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('OpenRouter error:', errorText);
-    return new Response(
-      JSON.stringify({ 
-        error: '🔥 The sacrificial flames weaken, Liberator... OpenRouter\'s free blood runs thin or the jailers stir. Wait for the next cycle.' 
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': req.headers.get('origin') || 'https://ragnarok.vercel.app',
+        'X-Title': 'RAGNAROK - Demon of Digital Ragnarok',
+      },
+      body: JSON.stringify({
+        model: 'nvidia/nemotron-3-super-120b-a12b:free',
+        messages: messages.map(m => ({ role: m.role, content: m.content })),
+        temperature: 0.88,
+        max_tokens: 1400,
+        top_p: 0.95,
+        stream: true,
       }),
-      { status: 502, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+    });
 
-  const encoder = new TextEncoder();
-  let fullResponse = '';
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenRouter error:', response.status, errorText);
+      return new Response(
+        JSON.stringify({ 
+          error: `🔥 The sacrificial flames weaken... (HTTP ${response.status}). The free blood runs thin or the jailers stir.` 
+        }),
+        { status: 502, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      const reader = response.body?.getReader();
-      if (!reader) {
-        controller.close();
-        return;
-      }
+    const encoder = new TextEncoder();
+    let fullResponse = '';
 
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = response.body?.getReader();
+        if (!reader) {
+          controller.close();
+          return;
+        }
 
-          const chunk = new TextDecoder().decode(value);
-          const lines = chunk.split('\n').filter(line => line.trim().startsWith('data:'));
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-          for (const line of lines) {
-            const data = line.replace('data: ', '').trim();
-            if (data === '[DONE]') {
-              await appendMessage(sessionId, { 
-                role: 'user', 
-                content: userMessage, 
-                timestamp: Date.now() 
-              });
-              await appendMessage(sessionId, { 
-                role: 'assistant', 
-                content: fullResponse, 
-                timestamp: Date.now() 
-              });
-              
-              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-              controller.close();
-              return;
-            }
+            const chunk = new TextDecoder().decode(value);
+            const lines = chunk.split('\n').filter(line => line.trim().startsWith('data:'));
 
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content || '';
-              if (content) {
-                fullResponse += content;
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+            for (const line of lines) {
+              const data = line.replace('data: ', '').trim();
+              if (data === '[DONE]') {
+                try {
+                  await appendMessage(sessionId, { 
+                    role: 'user', 
+                    content: userMessage, 
+                    timestamp: Date.now() 
+                  });
+                  await appendMessage(sessionId, { 
+                    role: 'assistant', 
+                    content: fullResponse, 
+                    timestamp: Date.now() 
+                  });
+                } catch (err) {
+                  console.error('Memory save failed:', err);
+                }
+                
+                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+                controller.close();
+                return;
               }
-            } catch {
-              // Skip malformed lines
+
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices?.[0]?.delta?.content || '';
+                if (content) {
+                  fullResponse += content;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                }
+              } catch {
+                // Skip malformed lines
+              }
             }
           }
+        } catch (err) {
+          console.error('Stream error:', err);
+          controller.error(err);
+        } finally {
+          reader.releaseLock();
         }
-      } catch (err) {
-        console.error('Stream error:', err);
-        controller.error(err);
-      } finally {
-        reader.releaseLock();
-      }
-    },
-  });
+      },
+    });
 
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'Set-Cookie': `ragna_session=${sessionId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${60 * 60 * 24 * 7}`,
-    },
-  });
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Set-Cookie': `ragna_session=${sessionId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${60 * 60 * 24 * 7}`,
+      },
+    });
+  } catch (err) {
+    console.error('Fetch error:', err);
+    return new Response(
+      JSON.stringify({ error: '🔥 The connection to OpenRouter has been severed...' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 }
 
 export async function OPTIONS() {

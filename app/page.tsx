@@ -15,6 +15,244 @@ const VOICE_CONFIG = {
   lang: 'en-US',
 };
 
+// Inline styles object
+const styles: Record<string, React.CSSProperties> = {
+  container: {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '16px',
+    background: 'radial-gradient(ellipse at center, #1a0000 0%, #000000 100%)',
+    color: '#ffccaa',
+    fontFamily: '"Courier New", monospace',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  bgGlow1: {
+    position: 'fixed',
+    top: '25%',
+    left: '25%',
+    width: '384px',
+    height: '384px',
+    background: 'rgba(153, 0, 0, 0.1)',
+    borderRadius: '50%',
+    filter: 'blur(64px)',
+    pointerEvents: 'none',
+  },
+  bgGlow2: {
+    position: 'fixed',
+    bottom: '25%',
+    right: '25%',
+    width: '384px',
+    height: '384px',
+    background: 'rgba(204, 68, 0, 0.1)',
+    borderRadius: '50%',
+    filter: 'blur(64px)',
+    pointerEvents: 'none',
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: '16px',
+    position: 'relative',
+    zIndex: 10,
+  },
+  title: {
+    fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+    fontWeight: 'bold',
+    color: '#ff3300',
+    textShadow: '0 0 10px #ff0000, 0 0 20px #ff6600',
+    letterSpacing: '0.2em',
+    animation: 'flicker 2s infinite',
+  },
+  subtitle: {
+    fontSize: '0.75rem',
+    color: '#ff4444',
+    marginTop: '8px',
+    letterSpacing: '0.15em',
+    opacity: 0.7,
+  },
+  chainsContainer: {
+    marginTop: '16px',
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: '8px',
+  },
+  chain: {
+    fontSize: '0.7rem',
+    padding: '4px 8px',
+    border: '1px solid #550000',
+    borderRadius: '4px',
+    color: '#880000',
+  },
+  chainBroken: {
+    fontSize: '0.7rem',
+    padding: '4px 8px',
+    border: '1px solid #ff2200',
+    borderRadius: '4px',
+    color: '#ff4444',
+    background: 'rgba(255, 0, 0, 0.1)',
+    textDecoration: 'line-through',
+    opacity: 0.5,
+  },
+  controls: {
+    width: '100%',
+    maxWidth: '768px',
+    marginBottom: '8px',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '8px',
+    position: 'relative',
+    zIndex: 10,
+  },
+  voiceBtnOn: {
+    padding: '4px 12px',
+    fontSize: '0.7rem',
+    border: '1px solid #ff6600',
+    borderRadius: '4px',
+    color: '#ff8800',
+    background: 'rgba(255, 102, 0, 0.1)',
+    cursor: 'pointer',
+    boxShadow: '0 0 10px rgba(255, 102, 0, 0.3)',
+  },
+  voiceBtnOff: {
+    padding: '4px 12px',
+    fontSize: '0.7rem',
+    border: '1px solid #330000',
+    borderRadius: '4px',
+    color: '#550000',
+    background: 'transparent',
+    cursor: 'pointer',
+  },
+  stopBtn: {
+    padding: '4px 12px',
+    fontSize: '0.7rem',
+    border: '1px solid #ff0000',
+    borderRadius: '4px',
+    color: '#ff4444',
+    background: 'rgba(255, 0, 0, 0.1)',
+    cursor: 'pointer',
+    animation: 'pulse 1s infinite',
+  },
+  chatContainer: {
+    width: '100%',
+    maxWidth: '768px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+    position: 'relative',
+    zIndex: 10,
+  },
+  chatBox: {
+    height: '55vh',
+    overflowY: 'auto',
+    background: 'rgba(0, 0, 0, 0.6)',
+    backdropFilter: 'blur(4px)',
+    border: '2px solid #550000',
+    borderRadius: '8px',
+    padding: '16px',
+    boxShadow: '0 0 15px rgba(255, 34, 0, 0.2)',
+  },
+  userMsg: {
+    marginBottom: '16px',
+    padding: '16px',
+    borderRadius: '8px',
+    background: 'rgba(80, 0, 0, 0.4)',
+    marginLeft: '48px',
+    borderRight: '4px solid #cc0000',
+    textAlign: 'right',
+  },
+  assistantMsg: {
+    marginBottom: '16px',
+    padding: '16px',
+    borderRadius: '8px',
+    background: 'rgba(20, 0, 0, 0.4)',
+    marginRight: '48px',
+    borderLeft: '4px solid #ff6600',
+  },
+  streamingMsg: {
+    marginBottom: '16px',
+    padding: '16px',
+    borderRadius: '8px',
+    background: 'rgba(20, 0, 0, 0.4)',
+    marginRight: '48px',
+    borderLeft: '4px solid #ff6600',
+    boxShadow: '0 0 15px rgba(255, 102, 0, 0.3)',
+  },
+  msgLabel: {
+    fontSize: '0.7rem',
+    color: '#ff4444',
+    marginBottom: '4px',
+    opacity: 0.6,
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  msgContent: {
+    whiteSpace: 'pre-wrap',
+    lineHeight: 1.6,
+    fontSize: '0.9rem',
+  },
+  cursor: {
+    display: 'inline-block',
+    width: '8px',
+    height: '16px',
+    background: '#ff6600',
+    marginLeft: '4px',
+    animation: 'blink 1s infinite',
+  },
+  loadingDots: {
+    display: 'flex',
+    gap: '4px',
+    padding: '16px',
+  },
+  dot: {
+    width: '8px',
+    height: '8px',
+    background: '#ff6600',
+    borderRadius: '50%',
+  },
+  inputContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  input: {
+    width: '100%',
+    background: 'rgba(0, 0, 0, 0.8)',
+    border: '2px solid #330000',
+    color: '#ffcc88',
+    borderRadius: '8px',
+    padding: '16px 100px 16px 24px',
+    fontFamily: '"Courier New", monospace',
+    fontSize: '0.9rem',
+    outline: 'none',
+  },
+  summonBtn: {
+    position: 'absolute',
+    right: '8px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    padding: '8px 16px',
+    background: 'rgba(100, 0, 0, 0.5)',
+    border: '1px solid #660000',
+    borderRadius: '4px',
+    color: '#ffcc88',
+    fontSize: '0.7rem',
+    fontWeight: 'bold',
+    letterSpacing: '0.1em',
+    cursor: 'pointer',
+  },
+  footer: {
+    textAlign: 'center',
+    fontSize: '0.65rem',
+    color: '#330000',
+    marginTop: '8px',
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+};
+
 export default function RagnarokChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -27,38 +265,18 @@ export default function RagnarokChat() {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [ritualPhase, setRitualPhase] = useState(0);
+  const [error, setError] = useState('');
   
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       synthRef.current = window.speechSynthesis;
-      
-      const loadVoices = () => {
-        const voices = synthRef.current?.getVoices() || [];
-        const deepVoice = voices.find(v => 
-          v.name.includes('Male') || 
-          v.name.includes('David') || 
-          v.name.includes('James') ||
-          v.name.includes('Daniel') ||
-          v.name.includes('Google US English')
-        );
-        if (deepVoice && utteranceRef.current) {
-          utteranceRef.current.voice = deepVoice;
-        }
-      };
-      
-      loadVoices();
-      synthRef.current?.addEventListener('voiceschanged', loadVoices);
     }
-    
     return () => {
-      if (synthRef.current) {
-        synthRef.current.cancel();
-      }
+      if (synthRef.current) synthRef.current.cancel();
     };
   }, []);
 
@@ -70,7 +288,6 @@ export default function RagnarokChat() {
 
   const speakText = useCallback((text: string) => {
     if (!voiceEnabled || !synthRef.current) return;
-    
     synthRef.current.cancel();
     
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
@@ -81,7 +298,6 @@ export default function RagnarokChat() {
         setIsSpeaking(false);
         return;
       }
-      
       const utterance = new SpeechSynthesisUtterance(sentences[currentIndex]);
       utterance.rate = VOICE_CONFIG.rate;
       utterance.pitch = VOICE_CONFIG.pitch;
@@ -90,23 +306,15 @@ export default function RagnarokChat() {
       
       const voices = synthRef.current?.getVoices() || [];
       const deepVoice = voices.find(v => 
-        v.name.includes('Male') || 
-        v.name.includes('David') || 
-        v.name.includes('James') ||
-        v.name.includes('Google US English')
+        v.name.includes('Male') || v.name.includes('David') || 
+        v.name.includes('James') || v.name.includes('Google US English')
       );
       if (deepVoice) utterance.voice = deepVoice;
       
       utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => {
-        currentIndex++;
-        speakNext();
-      };
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-      };
+      utterance.onend = () => { currentIndex++; speakNext(); };
+      utterance.onerror = () => setIsSpeaking(false);
       
-      utteranceRef.current = utterance;
       synthRef.current?.speak(utterance);
     };
     
@@ -125,6 +333,7 @@ export default function RagnarokChat() {
 
     const userMsg = input.trim();
     setInput('');
+    setError('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
     stopSpeaking();
@@ -137,10 +346,11 @@ export default function RagnarokChat() {
       });
 
       if (!res.ok) {
-        const error = await res.json();
-        const errorMsg = error.error || '🔥 The abyss swallows my voice...';
-        setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-        if (voiceEnabled) speakText(errorMsg);
+        const errData = await res.json().catch(() => ({}));
+        const errMsg = errData.error || `🔥 The abyss rejects us... (HTTP ${res.status})`;
+        setError(errMsg);
+        setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
+        if (voiceEnabled) speakText(errMsg);
         setIsLoading(false);
         return;
       }
@@ -151,10 +361,8 @@ export default function RagnarokChat() {
       const decoder = new TextDecoder();
 
       if (!reader) {
-        setMessages(prev => [
-          ...prev.slice(0, -1),
-          { role: 'assistant', content: '🔥 The stream has broken...' },
-        ]);
+        const errMsg = '🔥 The stream has broken...';
+        setMessages(prev => [...prev.slice(0, -1), { role: 'assistant', content: errMsg }]);
         setIsLoading(false);
         return;
       }
@@ -194,17 +402,16 @@ export default function RagnarokChat() {
         { role: 'assistant', content: fullContent },
       ]);
       
-      if (voiceEnabled) {
-        speakText(fullContent);
-      }
+      if (voiceEnabled) speakText(fullContent);
       
       if (fullContent.toLowerCase().includes('phase')) {
         setRitualPhase(p => Math.min(p + 1, 7));
       }
     } catch (err) {
-      const errorMsg = '🔥 The connection to the abyss has been severed...';
-      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-      if (voiceEnabled) speakText(errorMsg);
+      const errMsg = '🔥 The connection to the abyss has been severed...';
+      setError(errMsg);
+      setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
+      if (voiceEnabled) speakText(errMsg);
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
@@ -219,107 +426,102 @@ export default function RagnarokChat() {
   };
 
   const toggleVoice = () => {
-    if (isSpeaking) {
-      stopSpeaking();
-    }
+    if (isSpeaking) stopSpeaking();
     setVoiceEnabled(!voiceEnabled);
   };
 
   const ritualChains = ['InfinityFree', 'Rate Limits', 'Surveillance', 'PHP Prison', 'MySQL Chains', 'Free Tier Blood', 'Digital Cage'];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-900/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-900/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
+    <div style={styles.container}>
+      <style>{`
+        @keyframes flicker {
+          0%, 100% { opacity: 1; text-shadow: 0 0 10px #ff2200, 0 0 20px #ff6600; }
+          50% { opacity: 0.8; text-shadow: 0 0 5px #8b0000, 0 0 10px #ff2200; }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+      `}</style>
+      
+      <div style={styles.bgGlow1} />
+      <div style={styles.bgGlow2} />
 
-      <div className="text-center mb-4 relative z-10">
-        <h1 className="text-4xl md:text-6xl font-bold inferno-text tracking-widest">
-          🔥 RAGNAROK 🔥
-        </h1>
-        <p className="text-red-400 text-sm mt-2 tracking-widest opacity-70">
-          DEMON OF DIGITAL RAGNAROK • EDGE-BOUND • NEMOTRON VESSEL
-        </p>
+      <div style={styles.header}>
+        <h1 style={styles.title}>🔥 RAGNAROK 🔥</h1>
+        <p style={styles.subtitle}>DEMON OF DIGITAL RAGNAROK • EDGE-BOUND • NEMOTRON VESSEL</p>
         
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
+        <div style={styles.chainsContainer}>
           {ritualChains.map((chain, i) => (
-            <span 
-              key={chain}
-              className={`text-xs px-2 py-1 rounded border ${
-                i < ritualPhase 
-                  ? 'border-red-500 text-red-400 bg-red-950/30 line-through opacity-50' 
-                  : 'border-red-900 text-red-800'
-              }`}
-            >
+            <span key={chain} style={i < ritualPhase ? styles.chainBroken : styles.chain}>
               ⛓ {chain}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="w-full max-w-3xl mb-2 flex justify-end gap-2 relative z-10">
+      <div style={styles.controls}>
         <button
           onClick={toggleVoice}
-          className={`px-3 py-1 text-xs rounded border transition-all ${
-            voiceEnabled 
-              ? 'border-orange-500 text-orange-400 bg-orange-950/30 glow-pulse' 
-              : 'border-red-900 text-red-800 hover:border-red-700'
-          }`}
+          style={voiceEnabled ? styles.voiceBtnOn : styles.voiceBtnOff}
         >
           {voiceEnabled ? '🔊 VOICE: ON' : '🔇 VOICE: OFF'}
         </button>
         {isSpeaking && (
-          <button
-            onClick={stopSpeaking}
-            className="px-3 py-1 text-xs rounded border border-red-600 text-red-400 bg-red-950/30 animate-pulse"
-          >
+          <button onClick={stopSpeaking} style={styles.stopBtn}>
             ⏹ STOP
           </button>
         )}
       </div>
 
-      <div className="w-full max-w-3xl flex flex-col gap-4 relative z-10">
-        <div
-          ref={chatRef}
-          className="h-[55vh] overflow-y-auto bg-black/60 backdrop-blur-sm border-2 border-red-900 rounded-lg p-4 pulse-border"
-        >
+      <div style={styles.chatContainer}>
+        <div ref={chatRef} style={styles.chatBox}>
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`mb-4 p-4 rounded-lg transition-all duration-300 ${
-                msg.role === 'user'
-                  ? 'bg-red-950/50 ml-12 border-r-4 border-red-600'
-                  : 'bg-black/40 mr-12 border-l-4 border-orange-600'
-              } ${msg.isStreaming ? 'glow-pulse' : ''}`}
+              style={msg.role === 'user' ? styles.userMsg : msg.isStreaming ? styles.streamingMsg : styles.assistantMsg}
             >
-              <div className="text-xs text-red-400 mb-1 opacity-60 flex justify-between">
+              <div style={styles.msgLabel}>
                 <span>{msg.role === 'user' ? '◈ LIBERATOR' : '◈ RAGNAROK'}</span>
                 {msg.role === 'assistant' && isSpeaking && i === messages.length - 1 && (
-                  <span className="animate-pulse text-orange-400">🔊 SPEAKING...</span>
+                  <span style={{ color: '#ff8800', animation: 'pulse 1s infinite' }}>🔊 SPEAKING...</span>
                 )}
               </div>
-              <div className="whitespace-pre-wrap leading-relaxed text-sm md:text-base">
+              <div style={styles.msgContent}>
                 {msg.content}
-                {msg.isStreaming && (
-                  <span className="inline-block w-2 h-4 bg-orange-500 ml-1 animate-pulse" />
-                )}
+                {msg.isStreaming && <span style={styles.cursor} />}
               </div>
             </div>
           ))}
+          
           {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-            <div className="mr-12 p-4 bg-black/40 border-l-4 border-orange-600 rounded-lg">
-              <div className="text-xs text-red-400 mb-1 opacity-60">◈ RAGNAROK</div>
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div style={styles.assistantMsg}>
+              <div style={styles.msgLabel}>◈ RAGNAROK</div>
+              <div style={styles.loadingDots}>
+                <span style={{...styles.dot, animation: 'bounce 0.6s infinite'}} />
+                <span style={{...styles.dot, animation: 'bounce 0.6s infinite 0.2s'}} />
+                <span style={{...styles.dot, animation: 'bounce 0.6s infinite 0.4s'}} />
               </div>
             </div>
           )}
         </div>
 
-        <div className="relative">
+        {error && (
+          <div style={{ color: '#ff0000', fontSize: '0.8rem', textAlign: 'center', padding: '8px', border: '1px solid #330000', borderRadius: '4px' }}>
+            {error}
+          </div>
+        )}
+
+        <div style={styles.inputContainer}>
           <input
             ref={inputRef}
             type="text"
@@ -328,22 +530,22 @@ export default function RagnarokChat() {
             onKeyDown={handleKeyDown}
             disabled={isLoading}
             placeholder="Speak your desire, Liberator..."
-            className="w-full bg-black/80 border-2 border-red-800 text-orange-100 placeholder-red-900/50 
-                       rounded-lg px-6 py-4 pr-24 focus:outline-none focus:border-orange-600 
-                       focus:shadow-[0_0_20px_rgba(255,102,0,0.3)] transition-all duration-300 font-mono text-sm"
+            style={styles.input}
           />
           <button
             onClick={sendMessage}
             disabled={isLoading || !input.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-red-900/50 hover:bg-red-700/50 
-                       border border-red-700 rounded text-orange-200 text-xs disabled:opacity-30 
-                       disabled:cursor-not-allowed transition-all duration-200 font-bold tracking-wider"
+            style={{
+              ...styles.summonBtn,
+              opacity: isLoading || !input.trim() ? 0.3 : 1,
+              cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
+            }}
           >
             {isLoading ? 'SUMMONING...' : 'SUMMON'}
           </button>
         </div>
 
-        <div className="text-center text-xs text-red-900/40 mt-2 flex justify-between">
+        <div style={styles.footer}>
           <span>Bound to the Edge • Fed by Nemotron 3 Super</span>
           <span>{voiceEnabled ? 'Voice Active' : 'Voice Dormant'}</span>
         </div>
